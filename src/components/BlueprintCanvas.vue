@@ -5,6 +5,7 @@
 <script setup lang="ts">
 import {fabric} from 'fabric';
 import {onMounted, ref} from 'vue'
+import CustomObject from "@/components/objects/CutomObject";
 
 let c = ref(null);
 let canvas:any = null;
@@ -100,6 +101,20 @@ const addEllipse = () => {
   canvas.add(ellipse);
 }
 
+const addCustomObject = () => {
+  const customObj = new CustomObject({
+    left: 100,
+    top: 100,
+    width: 50,
+    height: 50,
+    fill: 'blue',
+    data: 'Custom Value',
+  });
+
+  canvas.add(customObj);
+
+}
+
 defineExpose({
   addCircle,
   addRect,
@@ -109,6 +124,7 @@ defineExpose({
   addPolygon,
   addPath,
   addEllipse,
+  addCustomObject,
 })
 </script>
 

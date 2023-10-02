@@ -48,6 +48,10 @@ const addEllipse = () => {
   canvas.value?.addEllipse();
 }
 
+const addCustomObject = () => {
+  canvas.value?.addCustomObject();
+}
+
 </script>
 
 <template>
@@ -61,6 +65,7 @@ const addEllipse = () => {
       <button @click="addPolygon">Polygon</button>
       <button @click="addPath">Path</button>
       <button @click="addEllipse">Ellipse</button>
+      <button @click="addCustomObject">CustomObject</button>
     </div>
     <div>
       <BlueprintCanvas ref="canvas" msg="Homecheck Blueprint Canvas"/>
