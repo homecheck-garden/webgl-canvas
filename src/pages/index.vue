@@ -7,10 +7,11 @@ layout: "default"
 </route>
 
 <script setup lang="ts">
-import {ref, onMounted} from 'vue';
+import {ref, onMounted, unref} from 'vue';
 import BlueprintCanvas from '@/components/BlueprintCanvas.vue';
 
 const canvas = ref<InstanceType<typeof BlueprintCanvas> | null>(null);
+const imageInput = ref(null);
 
 onMounted(() => {
 
@@ -52,6 +53,24 @@ const addCustomObject = () => {
   canvas.value?.addCustomObject();
 }
 
+const addImage = () => {
+  const input = unref(imageInput);
+  if (input && input.files && input.files.length > 0) {
+    const file = input.files[0];
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const imageUrl = event.target.result as string;
+      canvas.value?.addImage(imageUrl)
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+const setBackgroundColor = () => {
+  (canvas.value?.getBackgroundColor() === 'red')?canvas.value?.setBackgroundColor(''):canvas.value?.setBackgroundColor('red');
+}
+
 </script>
 
 <template>
@@ -66,6 +85,8 @@ const addCustomObject = () => {
       <button @click="addPath">Path</button>
       <button @click="addEllipse">Ellipse</button>
       <button @click="addCustomObject">CustomObject</button>
+      <button @click="setBackgroundColor">backgroundColor</button>
+      <input type="file" ref="imageInput" @change="addImage" accept="image/*">
     </div>
     <div>
       <BlueprintCanvas ref="canvas" msg="Homecheck Blueprint Canvas"/>

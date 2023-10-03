@@ -8,9 +8,9 @@ import {onMounted, ref} from 'vue'
 import CustomObject from "@/components/objects/CutomObject";
 
 let c = ref(null);
-let canvas:any = null;
+let canvas: any = null;
 
-onMounted(()=>{
+onMounted(() => {
   canvas = new fabric.Canvas(c.value, {
     // You can specify Fabric.js options here
     width: 800,
@@ -53,9 +53,9 @@ const addLine = () => {
 const addPolyline = () => {
   const polyline = new fabric.Polyline(
       [
-        { x: 50, y: 300 },
-        { x: 150, y: 300 },
-        { x: 100, y: 400 },
+        {x: 50, y: 300},
+        {x: 150, y: 300},
+        {x: 100, y: 400},
       ],
       {
         stroke: 'green',
@@ -69,10 +69,10 @@ const addPolyline = () => {
 const addPolygon = () => {
   const polygon = new fabric.Polygon(
       [
-        { x: 200, y: 50 },
-        { x: 250, y: 100 },
-        { x: 300, y: 50 },
-        { x: 275, y: 0 },
+        {x: 200, y: 50},
+        {x: 250, y: 100},
+        {x: 300, y: 50},
+        {x: 275, y: 0},
       ],
       {
         fill: 'purple',
@@ -112,8 +112,26 @@ const addCustomObject = () => {
   });
 
   canvas.add(customObj);
-
 }
+
+const addImage = (url: String) => {
+  fabric.Image.fromURL(url, (image) => {
+    // You can specify the position and other properties of the image here
+    image.set({left: 200, top: 200, scaleX: 0.5, scaleY: 0.5});
+
+    canvas.add(image);
+  });
+}
+
+const setBackgroundColor = (color: String) => {
+  canvas.backgroundColor = color;
+  canvas.renderAll();
+}
+
+const getBackgroundColor = (color: String) => {
+  return canvas.backgroundColor;
+}
+
 
 defineExpose({
   addCircle,
@@ -125,6 +143,9 @@ defineExpose({
   addPath,
   addEllipse,
   addCustomObject,
+  setBackgroundColor,
+  getBackgroundColor,
+  addImage,
 })
 </script>
 
