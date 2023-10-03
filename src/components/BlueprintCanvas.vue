@@ -4,28 +4,37 @@
 
 <script setup lang="ts">
 import {fabric} from 'fabric';
-import {onMounted, ref} from 'vue'
-import CustomObject from "@/components/objects/CutomObject";
+import {computed, onMounted, ref, WritableComputedRef} from 'vue'
+import CustomObject from "@/components/objects/CustomObject";
 
 let c = ref(null);
 let canvas: any = null;
 
+const backgroundObjects: Array<Object> = [];
+const objects: Array<Object> = [];
+
+let editLayer: string = 'background';
+
+const props = defineProps(['width', 'height', 'editLayer'])
+
 onMounted(() => {
   canvas = new fabric.Canvas(c.value, {
     // You can specify Fabric.js options here
-    width: 800,
-    height: 600,
+    width: props.width,
+    height: props.height,
   });
 })
 
 const addCircle = () => {
   const circle = new fabric.Circle({top: 100, radius: 50, fill: 'blue'});
   canvas.add(circle);
+  addToLayer(editLayer, circle);
 }
 
 const addRect = () => {
   const rect = new fabric.Rect({top: 100, left: 100, width: 100, height: 100, fill: 'red'});
   canvas.add(rect);
+  addToLayer(editLayer, rect);
 }
 
 const addTriangle = () => {
@@ -37,7 +46,7 @@ const addTriangle = () => {
     fill: 'blue',
   });
   canvas.add(triangle);
-
+  addToLayer(editLayer, triangle);
 }
 
 const addLine = () => {
@@ -48,6 +57,7 @@ const addLine = () => {
     strokeWidth: 5,
   });
   canvas.add(line);
+  addToLayer(editLayer, line);
 }
 
 const addPolyline = () => {
@@ -64,6 +74,7 @@ const addPolyline = () => {
       }
   );
   canvas.add(polyline);
+  addToLayer(editLayer, polyline);
 }
 
 const addPolygon = () => {
@@ -79,6 +90,7 @@ const addPolygon = () => {
       }
   );
   canvas.add(polygon);
+  addToLayer(editLayer, polygon);
 }
 
 const addPath = () => {
@@ -88,6 +100,7 @@ const addPath = () => {
     fill: 'orange',
   });
   canvas.add(path);
+  addToLayer(editLayer, path);
 }
 
 const addEllipse = () => {
@@ -99,6 +112,7 @@ const addEllipse = () => {
     fill: 'pink',
   });
   canvas.add(ellipse);
+  addToLayer(editLayer, ellipse);
 }
 
 const addCustomObject = () => {
@@ -112,6 +126,7 @@ const addCustomObject = () => {
   });
 
   canvas.add(customObj);
+  addToLayer(editLayer, customObj);
 }
 
 const addImage = (url: string) => {
@@ -120,6 +135,7 @@ const addImage = (url: string) => {
     image.set({left: 200, top: 200, scaleX: 0.5, scaleY: 0.5});
 
     canvas.add(image);
+    addToLayer(editLayer, image);
   });
 }
 
@@ -132,6 +148,17 @@ const getBackgroundColor = () => {
   return canvas.backgroundColor;
 }
 
+const addToLayer = (layer: string, object: any) => {
+  if (layer == 'background') {
+    backgroundObjects.push(object)
+  } else {
+    objects.push(object)
+  }
+}
+
+const setEditableLayer = (layer: string) => {
+  editLayer = layer;
+}
 
 defineExpose({
   addCircle,
@@ -143,9 +170,10 @@ defineExpose({
   addPath,
   addEllipse,
   addCustomObject,
+  addImage,
   setBackgroundColor,
   getBackgroundColor,
-  addImage,
+  setEditableLayer,
 })
 </script>
 

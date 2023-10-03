@@ -14,7 +14,6 @@ const canvas = ref<InstanceType<typeof BlueprintCanvas> | null>(null);
 const imageInput = ref(null);
 
 onMounted(() => {
-
 })
 
 const addCircle = () => {
@@ -68,7 +67,15 @@ const addImage = () => {
 }
 
 const setBackgroundColor = () => {
-  (canvas.value?.getBackgroundColor() === 'red')?canvas.value?.setBackgroundColor(''):canvas.value?.setBackgroundColor('red');
+  (canvas.value?.getBackgroundColor() === 'red') ? canvas.value?.setBackgroundColor('') : canvas.value?.setBackgroundColor('red');
+}
+
+const onLayerChange = (event: any) => {
+  if (event.currentTarget.selectedIndex == 0) {
+    canvas.value?.setEditableLayer('background');
+  } else {
+    canvas.value?.setEditableLayer('object');
+  }
 }
 
 </script>
@@ -87,14 +94,24 @@ const setBackgroundColor = () => {
       <button @click="addCustomObject">CustomObject</button>
       <button @click="setBackgroundColor">backgroundColor</button>
       <input type="file" ref="imageInput" @change="addImage" accept="image/*">
+      <label>Layer : </label><select @change="onLayerChange">
+      <option>Background</option>
+      <option selected>Objects</option>
+    </select>
     </div>
     <div>
-      <BlueprintCanvas ref="canvas" msg="Homecheck Blueprint Canvas"/>
+      <BlueprintCanvas ref="canvas" width="800" height="600" edit-layer="object"/>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
 #buttonContainer {
+  margin-bottom: 3px;
+}
+
+button {
+  margin-left: 3px;
+  margin-bottom: 3px;
 }
 </style>
