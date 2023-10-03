@@ -114,7 +114,7 @@ const addCustomObject = () => {
   canvas.add(customObj);
 }
 
-const addImage = (url: String) => {
+const addImage = (url: string) => {
   fabric.Image.fromURL(url, (image) => {
     // You can specify the position and other properties of the image here
     image.set({left: 200, top: 200, scaleX: 0.5, scaleY: 0.5});
@@ -123,12 +123,12 @@ const addImage = (url: String) => {
   });
 }
 
-const setBackgroundColor = (color: String) => {
+const setBackgroundColor = (color: string) => {
   canvas.backgroundColor = color;
   canvas.renderAll();
 }
 
-const getBackgroundColor = (color: String) => {
+const getBackgroundColor = () => {
   return canvas.backgroundColor;
 }
 
@@ -152,6 +152,6 @@ defineExpose({
 <style scoped>
 /* Add any custom styles for your canvas here */
 #canvas {
-  border: 1px solid gray;
+  border: 1px solid grey;
 }
 </style>
