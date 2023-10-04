@@ -23,7 +23,28 @@ onMounted(() => {
     width: props.width,
     height: props.height,
   });
+
+  canvas.on("mouse:wheel", (opt: any) => {
+    opt.e.preventDefault()
+    opt.e.stopPropagation()
+    if (opt.e.ctrlKey) {
+      console.log("pinch")
+      let delta = opt.e.deltaY;
+      let zoom = canvas.getZoom();
+      zoom *= 0.999 ** delta;
+      if (zoom > 20) zoom = 20;
+      if (zoom < 0.01) zoom = 0.01;
+      canvas.zoomToPoint({x: opt.e.offsetX, y: opt.e.offsetY}, zoom);
+    } else {
+      let e = opt.e;
+      let vpt = canvas.viewportTransform;
+      vpt[4] += e.deltaX;
+      vpt[5] += e.deltaY;
+      canvas.requestRenderAll();
+    }
+  })
 })
+
 
 const addCircle = () => {
   const circle = new fabric.Circle({top: 100, radius: 50, fill: 'blue'});
