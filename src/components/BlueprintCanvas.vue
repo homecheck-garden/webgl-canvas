@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import {fabric} from 'fabric';
-import {computed, onMounted, ref, WritableComputedRef} from 'vue'
+import {onMounted, ref} from 'vue'
 import CustomObject from "@/components/objects/CustomObject";
 
 let c = ref(null);
@@ -43,8 +43,46 @@ onMounted(() => {
       canvas.requestRenderAll();
     }
   })
-})
+  let pausePanning = false, zoomStartScale = 1, currentX = 0, currentY = 0, lastX = 0, lastY = 0;
 
+  canvas.on({
+    'touch:gesture': function(e:any) {
+      if (e.e.touches && e.e.touches.length == 2) {
+        pausePanning = true;
+        let point = new fabric.Point(e.self.x, e.self.y);
+        if (e.self.state == "start") {
+          zoomStartScale = canvas.getZoom();
+        }
+        let delta = zoomStartScale * e.self.scale;
+        canvas.zoomToPoint(point, delta);
+        pausePanning = false;
+      }
+    },
+    'selection:created': function() {
+      console.log(pausePanning);
+      pausePanning = true;
+    },
+    'selection:cleared': function() {
+      pausePanning = false;
+    },
+    'touch:drag': function(e:any) {
+      if (!pausePanning && undefined != e.self.x) {
+        currentX = e.self.x;
+        currentY = e.self.y;
+        let xChange = currentX - lastX;
+        let yChange = currentY - lastY;
+
+        if( (Math.abs(currentX - lastX) <= 50) && (Math.abs(currentY - lastY) <= 50)) {
+          let delta = new fabric.Point(xChange, yChange);
+          canvas.relativePan(delta);
+        }
+
+        lastX = e.self.x;
+        lastY = e.self.y;
+      }
+    }
+  });
+})
 
 const addCircle = () => {
   const circle = new fabric.Circle({top: 100, radius: 50, fill: 'blue'});
