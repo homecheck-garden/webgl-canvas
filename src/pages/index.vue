@@ -48,6 +48,10 @@ const addEllipse = () => {
   canvas.value?.addEllipse();
 }
 
+const addArrow = () => {
+  canvas.value?.addArrow();
+}
+
 const addCustomObject = () => {
   canvas.value?.addCustomObject();
 }
@@ -91,6 +95,7 @@ const onLayerChange = (event: any) => {
       <button @click="addPolygon">Polygon</button>
       <button @click="addPath">Path</button>
       <button @click="addEllipse">Ellipse</button>
+      <button @click="addArrow">Arrow</button>
       <button @click="addCustomObject">CustomObject</button>
       <button @click="setBackgroundColor">backgroundColor</button>
       <input type="file" ref="imageInput" @change="addImage" accept="image/*">

@@ -18,6 +18,8 @@ let editLayer: string = 'background';
 const props = defineProps(['width', 'height', 'editLayer'])
 
 onMounted(() => {
+  let mode = 'edit'
+
   canvas = new fabric.Canvas(c.value, {
     // You can specify Fabric.js options here
     width: props.width,
@@ -28,7 +30,6 @@ onMounted(() => {
     opt.e.preventDefault()
     opt.e.stopPropagation()
     if (opt.e.ctrlKey) {
-      console.log("pinch")
       let delta = opt.e.deltaY;
       let zoom = canvas.getZoom();
       zoom *= 0.999 ** delta;
@@ -50,6 +51,7 @@ onMounted(() => {
       if (e.e.touches && e.e.touches.length == 2) {
         pausePanning = true;
         let point = new fabric.Point(e.self.x, e.self.y);
+        console.log(e);
         if (e.self.state == "start") {
           zoomStartScale = canvas.getZoom();
         }
@@ -81,17 +83,41 @@ onMounted(() => {
         lastY = e.self.y;
       }
     }
+
   });
+
+  canvas.on("mouse:down", function (opt:any) {
+    //console.log(opt.e.changedTouches.length);
+    // if(opt.e.touches.length == 2){
+    //   canvas.selectable = false;
+    //   mode = 'pan-or-zoom';
+    //   console.log(mode);
+    // }
+  }, false);
 })
 
 const addCircle = () => {
-  const circle = new fabric.Circle({top: 100, radius: 50, fill: 'blue'});
+  const circle = new fabric.Circle({
+    top: 100,
+    radius: 50,
+    fill: 'blue',
+    snapAngle: 45,
+    snapThreshold: 7,
+  });
   canvas.add(circle);
   addToLayer(editLayer, circle);
 }
 
 const addRect = () => {
-  const rect = new fabric.Rect({top: 100, left: 100, width: 100, height: 100, fill: 'red'});
+  const rect = new fabric.Rect({
+    top: 100,
+    left: 100,
+    width: 100,
+    height: 100,
+    fill: 'red',
+    snapAngle: 45,
+    snapThreshold: 7,
+  });
   canvas.add(rect);
   addToLayer(editLayer, rect);
 }
@@ -103,6 +129,8 @@ const addTriangle = () => {
     width: 100,
     height: 100,
     fill: 'blue',
+    snapAngle: 45,
+    snapThreshold: 7,
   });
   canvas.add(triangle);
   addToLayer(editLayer, triangle);
@@ -113,7 +141,9 @@ const addLine = () => {
     left: 50,
     top: 200,
     stroke: 'red',
-    strokeWidth: 5,
+    strokeWidth: 2,
+    snapAngle: 45,
+    snapThreshold: 7,
   });
   canvas.add(line);
   addToLayer(editLayer, line);
@@ -128,8 +158,10 @@ const addPolyline = () => {
       ],
       {
         stroke: 'green',
-        strokeWidth: 5,
+        strokeWidth: 3,
         fill: 'transparent',
+        snapAngle: 45,
+        snapThreshold: 7,
       }
   );
   canvas.add(polyline);
@@ -146,6 +178,8 @@ const addPolygon = () => {
       ],
       {
         fill: 'purple',
+        snapAngle: 45,
+        snapThreshold: 7,
       }
   );
   canvas.add(polygon);
@@ -157,6 +191,8 @@ const addPath = () => {
     left: 300,
     top: 200,
     fill: 'orange',
+    snapAngle: 45,
+    snapThreshold: 7,
   });
   canvas.add(path);
   addToLayer(editLayer, path);
@@ -169,9 +205,68 @@ const addEllipse = () => {
     rx: 50,
     ry: 30,
     fill: 'pink',
+    snapAngle: 45,
+    snapThreshold: 7,
   });
   canvas.add(ellipse);
   addToLayer(editLayer, ellipse);
+}
+
+const addArrow = () => {
+  let fromx = 100, fromy = 100, tox = 150, toy = 150;
+  let angle = Math.atan2(toy - fromy, tox - fromx);
+
+  let headlen = 15;  // arrow head size
+
+  // bring the line end back some to account for arrow head.
+  tox = tox - (headlen) * Math.cos(angle);
+  toy = toy - (headlen) * Math.sin(angle);
+
+  // calculate the points.
+  let points = [
+    {
+      x: fromx,  // start point
+      y: fromy
+    }, {
+      x: fromx - (headlen / 4) * Math.cos(angle - Math.PI / 2),
+      y: fromy - (headlen / 4) * Math.sin(angle - Math.PI / 2)
+    },{
+      x: tox - (headlen / 4) * Math.cos(angle - Math.PI / 2),
+      y: toy - (headlen / 4) * Math.sin(angle - Math.PI / 2)
+    }, {
+      x: tox - (headlen) * Math.cos(angle - Math.PI / 2),
+      y: toy - (headlen) * Math.sin(angle - Math.PI / 2)
+    },{
+      x: tox + (headlen) * Math.cos(angle),  // tip
+      y: toy + (headlen) * Math.sin(angle)
+    }, {
+      x: tox - (headlen) * Math.cos(angle + Math.PI / 2),
+      y: toy - (headlen) * Math.sin(angle + Math.PI / 2)
+    }, {
+      x: tox - (headlen / 4) * Math.cos(angle + Math.PI / 2),
+      y: toy - (headlen / 4) * Math.sin(angle + Math.PI / 2)
+    }, {
+      x: fromx - (headlen / 4) * Math.cos(angle + Math.PI / 2),
+      y: fromy - (headlen / 4) * Math.sin(angle + Math.PI / 2)
+    },{
+      x: fromx,
+      y: fromy
+    }
+  ];
+
+  // Create a Fabric.js polygon object representing the arrow
+  let arrow = new fabric.Polygon(points, {
+    left: 50,
+    top: 50,
+    fill: 'black',      // Fill color
+    strokeWidth: 2,     // Border width
+    snapAngle: 45,
+    snapThreshold: 7,
+  });
+
+  // Add the arrow to the canvas
+  canvas.add(arrow);
+  addToLayer(editLayer, arrow);
 }
 
 const addCustomObject = () => {
@@ -182,6 +277,8 @@ const addCustomObject = () => {
     height: 50,
     fill: 'blue',
     data: 'Custom Value',
+    snapAngle: 45,
+    snapThreshold: 7,
   });
 
   canvas.add(customObj);
@@ -191,7 +288,14 @@ const addCustomObject = () => {
 const addImage = (url: string) => {
   fabric.Image.fromURL(url, (image) => {
     // You can specify the position and other properties of the image here
-    image.set({left: 200, top: 200, scaleX: 0.5, scaleY: 0.5});
+    image.set({
+      left: 200,
+      top: 200,
+      scaleX: 0.5,
+      scaleY: 0.5,
+      snapAngle: 45,
+      snapThreshold: 7,
+    });
 
     canvas.add(image);
     addToLayer(editLayer, image);
@@ -228,6 +332,7 @@ defineExpose({
   addPolygon,
   addPath,
   addEllipse,
+  addArrow,
   addCustomObject,
   addImage,
   setBackgroundColor,
