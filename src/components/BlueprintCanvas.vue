@@ -44,50 +44,77 @@ onMounted(() => {
       canvas.requestRenderAll();
     }
   })
-  let pausePanning = false, zoomStartScale = 1, currentX = 0, currentY = 0, lastX = 0, lastY = 0;
+  let zoomStartScale = 1, currentX = 0, currentY = 0, lastX = 0, lastY = 0;
 
   canvas.on({
-    'touch:gesture': function(e:any) {
-      if (e.e.touches && e.e.touches.length == 2) {
-        pausePanning = true;
-        let point = new fabric.Point(e.self.x, e.self.y);
-        console.log(e);
-        if (e.self.state == "start") {
-          zoomStartScale = canvas.getZoom();
+    'touch:gesture': function (evt: any) {
+      if (evt.e.touches?.length == 2) {
+        if (evt.e.type == 'touchstart') {
+          mode = 'pan'
+          canvas.selectable = false;
+          console.log('pan mode');
+
+          lastX = evt.e.touches[0].clientX;
+          lastY = evt.e.touches[0].clientY;
         }
-        let delta = zoomStartScale * e.self.scale;
-        canvas.zoomToPoint(point, delta);
-        pausePanning = false;
+
+        let distanceX = Math.abs(evt.e.touches[0].clientX - evt.e.touches[1].clientX);
+        let distanceY = Math.abs(evt.e.touches[0].clientY - evt.e.touches[1].clientY);
+
+        if( distanceX >= 100 || distanceY >= 100) {
+          mode = 'zoom'
+          console.log('zoom mode');
+        }else{
+          mode = 'pan'
+          console.log('pan mode');
+        }
+
+        if(mode === 'zoom' && evt.self.state!='up'){
+
+          let x = evt.e.touches[0]?.clientX - (evt.e.touches[0]?.clientX-evt.e.touches[1]?.clientX)/2
+          let y = evt.e.touches[0]?.clientY - (evt.e.touches[0]?.clientY-evt.e.touches[1]?.clientY)/2
+          let point = new fabric.Point(x, y);
+          ////let point = new fabric.Point(evt.self.x, evt.self.y);
+
+          if (evt.self.state == "start") {
+            zoomStartScale = canvas.getZoom();
+          }
+          let delta = zoomStartScale * evt.self.scale;
+          canvas.zoomToPoint(point, delta);
+        }
       }
     },
-    'selection:created': function() {
-      console.log(pausePanning);
-      pausePanning = true;
+    'selection:created': function () {
     },
-    'selection:cleared': function() {
-      pausePanning = false;
+    'selection:cleared': function () {
     },
-    'touch:drag': function(e:any) {
-      if (!pausePanning && undefined != e.self.x) {
-        currentX = e.self.x;
-        currentY = e.self.y;
+    'touch:drag': function (evt: any) {
+      if (mode === 'pan' && evt.self.state!='up') {
+        currentX = evt.e.touches[0]?.clientX;
+        currentY = evt.e.touches[0]?.clientY;
         let xChange = currentX - lastX;
         let yChange = currentY - lastY;
 
-        if( (Math.abs(currentX - lastX) <= 50) && (Math.abs(currentY - lastY) <= 50)) {
-          let delta = new fabric.Point(xChange, yChange);
-          canvas.relativePan(delta);
-        }
+        let delta = new fabric.Point(xChange, yChange);
+        console.log(`pan delta:${delta}`);
+        canvas.relativePan(delta);
 
-        lastX = e.self.x;
-        lastY = e.self.y;
+        lastX = currentX;
+        lastY = currentY;
       }
     }
 
   });
 
-  canvas.on("mouse:down", function (opt:any) {
-    //console.log(opt.e.changedTouches.length);
+  canvas.on("mouse:up", function (opt: any) {
+    if (mode !== 'edit') {
+      console.log('touchend');
+      mode = 'edit';
+      canvas.selectable = true;
+      console.log('edit mode');
+    }
+
+
     // if(opt.e.touches.length == 2){
     //   canvas.selectable = false;
     //   mode = 'pan-or-zoom';
@@ -230,13 +257,13 @@ const addArrow = () => {
     }, {
       x: fromx - (headlen / 4) * Math.cos(angle - Math.PI / 2),
       y: fromy - (headlen / 4) * Math.sin(angle - Math.PI / 2)
-    },{
+    }, {
       x: tox - (headlen / 4) * Math.cos(angle - Math.PI / 2),
       y: toy - (headlen / 4) * Math.sin(angle - Math.PI / 2)
     }, {
       x: tox - (headlen) * Math.cos(angle - Math.PI / 2),
       y: toy - (headlen) * Math.sin(angle - Math.PI / 2)
-    },{
+    }, {
       x: tox + (headlen) * Math.cos(angle),  // tip
       y: toy + (headlen) * Math.sin(angle)
     }, {
@@ -248,7 +275,7 @@ const addArrow = () => {
     }, {
       x: fromx - (headlen / 4) * Math.cos(angle + Math.PI / 2),
       y: fromy - (headlen / 4) * Math.sin(angle + Math.PI / 2)
-    },{
+    }, {
       x: fromx,
       y: fromy
     }
