@@ -71,6 +71,11 @@ const addImage = () => {
   }
 }
 
+const showFileDialog = () => {
+  const input: any = unref(imageInput);
+  input.click();
+}
+
 const onLayerChange = (event: any) => {
   if (event.currentTarget.selectedIndex == 0) {
     canvas.value?.setEditableLayer('background');
@@ -114,7 +119,7 @@ const loadJSON = (event: any) => {
       <button @click="addArrow">Arrow</button>
       <button @click="addCustomObject">CustomObject</button>
       <input id="fileInput" type="file" ref="imageInput" @change="addImage" accept="image/*" style="display: none">
-      <button @click="">Image</button>
+      <button @click="showFileDialog">Image</button>
     </div>
     <div class="buttonContainer">
       <button @click="exportJSON">Export JSON</button>
