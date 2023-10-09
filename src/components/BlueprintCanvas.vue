@@ -346,6 +346,15 @@ const addToLayer = (layer: string, object: any) => {
   }
 }
 
+const exportJSON = () => {
+  return canvas.toDatalessJSON();
+}
+
+const loadJSON = (json:string) => {
+  canvas.loadFromJSON(json, (objects:any, options:any) => {
+  });
+}
+
 const setEditableLayer = (layer: string) => {
   editLayer = layer;
 }
@@ -365,6 +374,8 @@ defineExpose({
   setBackgroundColor,
   getBackgroundColor,
   setEditableLayer,
+  exportJSON,
+  loadJSON,
 })
 </script>
 

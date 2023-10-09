@@ -11,6 +11,7 @@ import {ref, onMounted, unref} from 'vue';
 import BlueprintCanvas from '@/components/BlueprintCanvas.vue';
 
 const canvas = ref<InstanceType<typeof BlueprintCanvas> | null>(null);
+const log = ref();
 const imageInput = ref(null);
 
 onMounted(() => {
@@ -57,21 +58,17 @@ const addCustomObject = () => {
 }
 
 const addImage = () => {
-  const input = unref(imageInput);
+  const input: any = unref(imageInput);
   if (input && input.files && input.files.length > 0) {
     const file = input.files[0];
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      const imageUrl = event.target.result as string;
+      const imageUrl = event.target?.result as string;
       canvas.value?.addImage(imageUrl)
     };
     reader.readAsDataURL(file);
   }
-}
-
-const setBackgroundColor = () => {
-  (canvas.value?.getBackgroundColor() === 'red') ? canvas.value?.setBackgroundColor('') : canvas.value?.setBackgroundColor('red');
 }
 
 const onLayerChange = (event: any) => {
@@ -82,11 +79,30 @@ const onLayerChange = (event: any) => {
   }
 }
 
+const onBackgroundColorChange = (event: any) => {
+  canvas.value?.setBackgroundColor(event.currentTarget.value)
+}
+
+const exportJSON = (event: any) => {
+  let json = JSON.stringify(canvas.value?.exportJSON());
+  console.log(json)
+  log.value.value = json;
+}
+
+const loadJSON = (event: any) => {
+  try {
+    canvas.value?.loadJSON(log.value.value);
+  } catch (e) {
+    alert('Load error. Please add valid json data in log textarea.')
+  }
+
+}
+
 </script>
 
 <template>
   <div>
-    <div id="buttonContainer">
+    <div class="buttonContainer">
       <button @click="addCircle">Circle</button>
       <button @click="addRect">Rect</button>
       <button @click="addTriangle">Triangle</button>
@@ -97,26 +113,57 @@ const onLayerChange = (event: any) => {
       <button @click="addEllipse">Ellipse</button>
       <button @click="addArrow">Arrow</button>
       <button @click="addCustomObject">CustomObject</button>
-      <button @click="setBackgroundColor">backgroundColor</button>
-      <input type="file" ref="imageInput" @change="addImage" accept="image/*">
-      <label>Layer : </label><select @change="onLayerChange">
-      <option>Background</option>
-      <option selected>Objects</option>
-    </select>
+      <input id="fileInput" type="file" ref="imageInput" @change="addImage" accept="image/*" style="display: none">
+      <button @click="">Image</button>
+    </div>
+    <div class="buttonContainer">
+      <button @click="exportJSON">Export JSON</button>
+      <button @click="loadJSON">Load JSON</button>
+      <label>Background Color : </label>
+      <select @change="onBackgroundColorChange">
+        <option selected value="">none</option>
+        <option value="red">Red</option>
+        <option value="gray">Gray</option>
+        <option value="blue">Blue</option>
+      </select>
+      <label>Layer : </label>
+      <select @change="onLayerChange">
+        <option>Background</option>
+        <option selected>Objects</option>
+      </select>
     </div>
     <div>
       <BlueprintCanvas ref="canvas" width="800" height="600" edit-layer="object"/>
+      <textarea id="log" ref="log"></textarea>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-#buttonContainer {
+* {
+  font-size: 11px;
+}
+
+label {
+  margin-left: 5px;
+}
+
+select {
+  margin-right: 5px;
+}
+
+.buttonContainer {
   margin-bottom: 3px;
 }
 
 button {
-  margin-left: 3px;
-  margin-bottom: 3px;
+  margin-left: 5px;
+  margin-bottom: 5px;
+}
+
+#log {
+  margin-top: 5px;
+  width: 796px;
+  height: 100px;
 }
 </style>
