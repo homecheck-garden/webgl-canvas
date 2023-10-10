@@ -53,6 +53,14 @@ const addArrow = () => {
   canvas.value?.addArrow();
 }
 
+const addDoubleArrow = () => {
+  canvas.value?.addDoubleArrow();
+}
+
+const addTextbox = () => {
+  canvas.value?.addTextbox();
+}
+
 const addCustomObject = () => {
   canvas.value?.addCustomObject();
 }
@@ -117,6 +125,8 @@ const loadJSON = (event: any) => {
       <button @click="addPath">Path</button>
       <button @click="addEllipse">Ellipse</button>
       <button @click="addArrow">Arrow</button>
+      <button @click="addDoubleArrow">Double Arrow</button>
+      <button @click="addTextbox">Textbox</button>
       <button @click="addCustomObject">CustomObject</button>
       <input id="fileInput" type="file" ref="imageInput" @change="addImage" accept="image/*" style="display: none">
       <button @click="showFileDialog">Image</button>

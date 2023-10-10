@@ -240,9 +240,8 @@ const addEllipse = () => {
 }
 
 const addArrow = () => {
-  let fromx = 100, fromy = 100, tox = 150, toy = 150;
+  let fromx = 100, fromy = 100, tox = 200, toy = 100;
   let angle = Math.atan2(toy - fromy, tox - fromx);
-
   let headlen = 15;  // arrow head size
 
   // bring the line end back some to account for arrow head.
@@ -294,6 +293,77 @@ const addArrow = () => {
   // Add the arrow to the canvas
   canvas.add(arrow);
   addToLayer(editLayer, arrow);
+}
+
+const addDoubleArrow = () => {
+  let fromx = 100, fromy = 100, tox = 200, toy = 100;
+  let angle = Math.atan2(toy - fromy, tox - fromx);
+  let headlen = 15;  // arrow head size
+
+  // bring the line end back some to account for arrow head.
+  tox = tox - (headlen) * Math.cos(angle);
+  toy = toy - (headlen) * Math.sin(angle);
+
+  // calculate the points.
+  let points = [
+    {
+      x: fromx,  // start point
+      y: fromy
+    },{
+      x: fromx + (headlen),
+      y: fromy + (headlen),
+    }, {
+      x: fromx + headlen,
+      y: fromy - (headlen / 4) * Math.sin(angle - Math.PI / 2)
+    }, {
+      x: tox - (headlen / 4) * Math.cos(angle - Math.PI / 2),
+      y: toy - (headlen / 4) * Math.sin(angle - Math.PI / 2)
+    }, {
+      x: tox - (headlen) * Math.cos(angle - Math.PI / 2),
+      y: toy - (headlen) * Math.sin(angle - Math.PI / 2)
+    }, {
+      x: tox + (headlen) * Math.cos(angle),  // tip
+      y: toy + (headlen) * Math.sin(angle)
+    }, {
+      x: tox - (headlen) * Math.cos(angle + Math.PI / 2),
+      y: toy - (headlen) * Math.sin(angle + Math.PI / 2)
+    }, {
+      x: tox - (headlen / 4) * Math.cos(angle + Math.PI / 2),
+      y: toy - (headlen / 4) * Math.sin(angle + Math.PI / 2)
+    }, {
+      x: fromx + headlen,
+      y: fromy - (headlen / 4),
+    }, {
+      x: fromx + headlen,
+      y: fromy - headlen,
+    }, {
+      x: fromx,
+      y: fromy
+    }
+  ];
+
+// Create a Fabric.js polygon object representing the double-headed arrow
+  let doubleArrow = new fabric.Polygon(points, {
+    left: 50,
+    top: 50,
+    fill: 'black',      // Fill color
+    strokeWidth: 2,     // Border width
+    snapAngle: 45,
+    snapThreshold: 7
+  });
+
+// Add the double-headed arrow to the canvas
+  canvas.add(doubleArrow);
+}
+
+const addTextbox = () => {
+  let text = new fabric.Textbox('Hello World', {
+    left: 100,
+    top: 100,
+    snapAngle: 45,
+    snapThreshold: 7
+  });
+  canvas.add(text);
 }
 
 const addCustomObject = () => {
@@ -369,6 +439,8 @@ defineExpose({
   addPath,
   addEllipse,
   addArrow,
+  addDoubleArrow,
+  addTextbox,
   addCustomObject,
   addImage,
   setBackgroundColor,
