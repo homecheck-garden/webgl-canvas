@@ -123,6 +123,18 @@ onMounted(() => {
   }, false);
 })
 
+const addPoint = () => {
+  const circle = new fabric.Circle({
+    top: 100,
+    left: 100,
+    radius: 5,
+    fill: 'red',
+  });
+
+  circle.hasControls = false;
+  canvas.add(circle);
+}
+
 const addCircle = () => {
   const circle = new fabric.Circle({
     top: 100,
@@ -443,6 +455,7 @@ defineExpose({
   addTextbox,
   addCustomObject,
   addImage,
+  addPoint,
   setBackgroundColor,
   getBackgroundColor,
   setEditableLayer,

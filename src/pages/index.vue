@@ -17,6 +17,10 @@ const imageInput = ref(null);
 onMounted(() => {
 })
 
+const addPoint = () => {
+  canvas.value?.addPoint();
+}
+
 const addCircle = () => {
   canvas.value?.addCircle();
 }
@@ -116,6 +120,7 @@ const loadJSON = (event: any) => {
 <template>
   <div>
     <div class="buttonContainer">
+      <button @click="addPoint">Point</button>
       <button @click="addCircle">Circle</button>
       <button @click="addRect">Rect</button>
       <button @click="addTriangle">Triangle</button>
