@@ -88,6 +88,14 @@ const showFileDialog = () => {
   input.click();
 }
 
+const focusToCenter = () => {
+    canvas.value?.focusToCenter();
+}
+
+const focusToSelection = () => {
+  canvas.value?.focusToSelection();
+}
+
 const onLayerChange = (event: any) => {
   if (event.currentTarget.selectedIndex == 0) {
     canvas.value?.setEditableLayer('background');
@@ -137,6 +145,8 @@ const loadJSON = (event: any) => {
       <button @click="showFileDialog">Image</button>
     </div>
     <div class="buttonContainer">
+      <button @click="focusToCenter">Focus to Center</button>
+      <button @click="focusToSelection">Focus To Selection</button>
       <button @click="exportJSON">Export JSON</button>
       <button @click="loadJSON">Load JSON</button>
       <label>Background Color : </label>

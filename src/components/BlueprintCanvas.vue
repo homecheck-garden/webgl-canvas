@@ -411,6 +411,28 @@ const addImage = (url: string) => {
   });
 }
 
+const focusToCenter = () => {
+  canvas.setViewportTransform([1,0,0,1,0,0]);
+}
+
+const focusToSelection = () => {
+  let selectedObject = canvas.getActiveObject();
+
+  if (selectedObject) {
+    let centerX = canvas.width / 2;
+    let centerY = canvas.height / 2;
+
+    let deltaX = centerX - selectedObject.left - selectedObject.width / 2;
+    let deltaY = centerY - selectedObject.top - selectedObject.height / 2;
+
+    let newTransform = [1,0,0,1,0,0];
+    newTransform[4] += deltaX;
+    newTransform[5] += deltaY;
+
+    canvas.setViewportTransform(newTransform);
+  }
+}
+
 const setBackgroundColor = (color: string) => {
   canvas.backgroundColor = color;
   canvas.renderAll();
@@ -456,6 +478,8 @@ defineExpose({
   addCustomObject,
   addImage,
   addPoint,
+  focusToCenter,
+  focusToSelection,
   setBackgroundColor,
   getBackgroundColor,
   setEditableLayer,
