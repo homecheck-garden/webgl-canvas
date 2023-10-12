@@ -1,5 +1,7 @@
 <template>
-  <canvas id="canvas" ref="c"></canvas>
+  <div>
+    <canvas id="canvas" ref="c"></canvas>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -19,7 +21,6 @@ const props = defineProps(['width', 'height', 'editLayer'])
 
 onMounted(() => {
   let mode = 'edit'
-
   canvas = new fabric.Canvas(c.value, {
     // You can specify Fabric.js options here
     width: props.width,
@@ -102,24 +103,14 @@ onMounted(() => {
         lastX = currentX;
         lastY = currentY;
       }
-    }
-
+    },
   });
 
   canvas.on("mouse:up", function (opt: any) {
     if (mode !== 'edit') {
-      console.log('touchend');
       mode = 'edit';
       canvas.selectable = true;
-      console.log('edit mode');
     }
-
-
-    // if(opt.e.touches.length == 2){
-    //   canvas.selectable = false;
-    //   mode = 'pan-or-zoom';
-    //   console.log(mode);
-    // }
   }, false);
 })
 
@@ -463,6 +454,13 @@ const setEditableLayer = (layer: string) => {
   editLayer = layer;
 }
 
+const translatePath = (point:any) => {
+  const fabricPoint = new fabric.Point(point.x, point.y);
+  const invertedMatrix = fabric.util.invertTransform(canvas.viewportTransform)
+  const transformedPoint = fabric.util.transformPoint(fabricPoint, invertedMatrix);
+  return transformedPoint;
+}
+
 defineExpose({
   addCircle,
   addRect,
@@ -485,6 +483,7 @@ defineExpose({
   setEditableLayer,
   exportJSON,
   loadJSON,
+  translatePath,
 })
 </script>
 

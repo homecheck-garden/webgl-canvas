@@ -123,6 +123,16 @@ const loadJSON = (event: any) => {
 
 }
 
+const onClickCanvas = (event: any) => {
+  let point:any = {}
+  point.x = event.offsetX;
+  point.y = event.offsetY;
+
+  console.log(`canvas offset : ${JSON.stringify(point)}`);
+  let transformed = canvas.value?.translatePath(point)
+  console.log(`transformed offset : ${JSON.stringify(transformed)}`);
+}
+
 </script>
 
 <template>
@@ -163,7 +173,7 @@ const loadJSON = (event: any) => {
       </select>
     </div>
     <div>
-      <BlueprintCanvas ref="canvas" width="800" height="600" edit-layer="object"/>
+      <BlueprintCanvas ref="canvas" width="800" height="600" edit-layer="object" @click="onClickCanvas"/>
       <textarea id="log" ref="log"></textarea>
     </div>
   </div>
