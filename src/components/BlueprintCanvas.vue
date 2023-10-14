@@ -25,6 +25,7 @@ onMounted(() => {
     // You can specify Fabric.js options here
     width: props.width,
     height: props.height,
+    selection: false,
   });
 
   canvas.on("mouse:wheel", (opt: any) => {
@@ -37,6 +38,8 @@ onMounted(() => {
       if (zoom > 20) zoom = 20;
       if (zoom < 0.01) zoom = 0.01;
       canvas.zoomToPoint({x: opt.e.offsetX, y: opt.e.offsetY}, zoom);
+      canvas.requestRenderAll();
+
     } else {
       let e = opt.e;
       let vpt = canvas.viewportTransform;
@@ -44,6 +47,10 @@ onMounted(() => {
       vpt[5] += e.deltaY;
       canvas.requestRenderAll();
     }
+    canvas.forEachObject((object: any) => {
+      object.setCoords();
+    });
+    canvas.requestRenderAll();
   })
   let zoomStartScale = 1, currentX = 0, currentY = 0, lastX = 0, lastY = 0;
 
@@ -62,18 +69,18 @@ onMounted(() => {
         let distanceX = Math.abs(evt.e.touches[0].clientX - evt.e.touches[1].clientX);
         let distanceY = Math.abs(evt.e.touches[0].clientY - evt.e.touches[1].clientY);
 
-        if( distanceX >= 100 || distanceY >= 100) {
+        if (distanceX >= 100 || distanceY >= 100) {
           mode = 'zoom'
           console.log('zoom mode');
-        }else{
+        } else {
           mode = 'pan'
           console.log('pan mode');
         }
 
-        if(mode === 'zoom' && evt.self.state!='up'){
+        if (mode === 'zoom' && evt.self.state != 'up') {
 
-          let x = evt.e.touches[0]?.clientX - (evt.e.touches[0]?.clientX-evt.e.touches[1]?.clientX)/2
-          let y = evt.e.touches[0]?.clientY - (evt.e.touches[0]?.clientY-evt.e.touches[1]?.clientY)/2
+          let x = evt.e.touches[0]?.clientX - (evt.e.touches[0]?.clientX - evt.e.touches[1]?.clientX) / 2
+          let y = evt.e.touches[0]?.clientY - (evt.e.touches[0]?.clientY - evt.e.touches[1]?.clientY) / 2
           let point = new fabric.Point(x, y);
           ////let point = new fabric.Point(evt.self.x, evt.self.y);
 
@@ -90,9 +97,9 @@ onMounted(() => {
     'selection:cleared': function () {
     },
     'touch:drag': function (evt: any) {
-      if (mode === 'pan' && evt.self.state!='up') {
-        currentX = evt.e.touches[0]?.clientX;
-        currentY = evt.e.touches[0]?.clientY;
+      if (mode === 'pan' && evt.self.state != 'up') {
+        currentX = evt.e.clientX ? evt.e.clientX:evt.e.touches[0].clientX;
+        currentY = evt.e.clientY ? evt.e.clientY:evt.e.touches[0].clientY;
         let xChange = currentX - lastX;
         let yChange = currentY - lastY;
 
@@ -106,18 +113,53 @@ onMounted(() => {
     },
   });
 
+  canvas.on("mouse:down", function (opt: any) {
+    if (!opt.target) {
+      mode = 'pan';
+      lastX = opt.e.clientX ? opt.e.clientX:opt.e.touches[0].clientX;
+      lastY = opt.e.clientY ? opt.e.clientY:opt.e.touches[0].clientY;
+    }
+  }, false);
+
   canvas.on("mouse:up", function (opt: any) {
     if (mode !== 'edit') {
       mode = 'edit';
       canvas.selectable = true;
+      canvas.forEachObject((object: any) => {
+        object.setCoords();
+      });
+      canvas.requestRenderAll();
     }
   }, false);
+
+  canvas.on("mouse:up", function (opt: any) {
+    if (mode !== 'edit') {
+      mode = 'edit';
+      canvas.selectable = true;
+      canvas.forEachObject((object: any) => {
+        object.setCoords();
+      });
+      canvas.requestRenderAll();
+    }
+  }, false);
+
+  document.onkeydown = function(evt) {
+    if (canvas.getActiveObject()) {
+      switch (evt.key) {
+        case 'Backspace': // delete
+        case 'Delete': // delete
+          canvas.remove(canvas.getActiveObject());
+      }
+      canvas.renderAll();
+    }
+  }
 })
 
 const addPoint = () => {
+  const point = getInsertionPoint();
   const circle = new fabric.Circle({
-    top: 100,
-    left: 100,
+    left: point.x,
+    top: point.y,
     radius: 5,
     fill: 'red',
   });
@@ -127,21 +169,25 @@ const addPoint = () => {
 }
 
 const addCircle = () => {
+  const point = getInsertionPoint();
   const circle = new fabric.Circle({
-    top: 100,
+    left: point.x,
+    top: point.y,
     radius: 50,
     fill: 'blue',
     snapAngle: 45,
     snapThreshold: 7,
   });
+
   canvas.add(circle);
   addToLayer(editLayer, circle);
 }
 
 const addRect = () => {
+  const point = getInsertionPoint();
   const rect = new fabric.Rect({
-    top: 100,
-    left: 100,
+    left: point.x,
+    top: point.y,
     width: 100,
     height: 100,
     fill: 'red',
@@ -153,9 +199,10 @@ const addRect = () => {
 }
 
 const addTriangle = () => {
+  const point = getInsertionPoint();
   const triangle = new fabric.Triangle({
-    left: 50,
-    top: 50,
+    left: point.x,
+    top: point.y,
     width: 100,
     height: 100,
     fill: 'blue',
@@ -167,9 +214,8 @@ const addTriangle = () => {
 }
 
 const addLine = () => {
-  const line = new fabric.Line([0, 0, 200, 0], {
-    left: 50,
-    top: 200,
+  const point = getInsertionPoint();
+  const line = new fabric.Line([point.x, point.y, point.x+200, point.y+0], {
     stroke: 'red',
     strokeWidth: 2,
     snapAngle: 45,
@@ -180,11 +226,12 @@ const addLine = () => {
 }
 
 const addPolyline = () => {
+  const point = getInsertionPoint();
   const polyline = new fabric.Polyline(
       [
-        {x: 50, y: 300},
-        {x: 150, y: 300},
-        {x: 100, y: 400},
+        {x: point.x, y: point.y},
+        {x: point.x + 100, y: point.y},
+        {x: point.x + 50, y: point.y + 100},
       ],
       {
         stroke: 'green',
@@ -199,13 +246,16 @@ const addPolyline = () => {
 }
 
 const addPolygon = () => {
+  const point = getInsertionPoint();
+  let points = [
+    {x: point.x, y: point.y+50},
+    {x: point.x+50, y: point.y+100},
+    {x: point.x+100, y: point.y+50},
+    {x: point.x+75, y: point.y},
+  ]
+
   const polygon = new fabric.Polygon(
-      [
-        {x: 200, y: 50},
-        {x: 250, y: 100},
-        {x: 300, y: 50},
-        {x: 275, y: 0},
-      ],
+      points,
       {
         fill: 'purple',
         snapAngle: 45,
@@ -217,9 +267,8 @@ const addPolygon = () => {
 }
 
 const addPath = () => {
-  const path = new fabric.Path('M 350 50 L 400 100 L 450 50 Z', {
-    left: 300,
-    top: 200,
+  const point = getInsertionPoint();
+  const path = new fabric.Path(`M ${point.x} ${point.y} L ${point.x+50} ${point.y+50} L ${point.x+100} ${point.y} Z`, {
     fill: 'orange',
     snapAngle: 45,
     snapThreshold: 7,
@@ -229,9 +278,10 @@ const addPath = () => {
 }
 
 const addEllipse = () => {
+  const point = getInsertionPoint();
   const ellipse = new fabric.Ellipse({
-    left: 400,
-    top: 400,
+    left: point.x,
+    top: point.y,
     rx: 50,
     ry: 30,
     fill: 'pink',
@@ -243,9 +293,10 @@ const addEllipse = () => {
 }
 
 const addArrow = () => {
-  let fromx = 100, fromy = 100, tox = 200, toy = 100;
-  let angle = Math.atan2(toy - fromy, tox - fromx);
+  let point =  getInsertionPoint()
   let headlen = 15;  // arrow head size
+  let fromx = point.x, fromy = point.y+headlen, tox = point.x+100+headlen, toy = point.y+headlen;
+  let angle = Math.atan2(toy - fromy, tox - fromx);
 
   // bring the line end back some to account for arrow head.
   tox = tox - (headlen) * Math.cos(angle);
@@ -285,8 +336,6 @@ const addArrow = () => {
 
   // Create a Fabric.js polygon object representing the arrow
   let arrow = new fabric.Polygon(points, {
-    left: 50,
-    top: 50,
     fill: 'black',      // Fill color
     strokeWidth: 2,     // Border width
     snapAngle: 45,
@@ -299,9 +348,10 @@ const addArrow = () => {
 }
 
 const addDoubleArrow = () => {
-  let fromx = 100, fromy = 100, tox = 200, toy = 100;
-  let angle = Math.atan2(toy - fromy, tox - fromx);
+  let point = getInsertionPoint();
   let headlen = 15;  // arrow head size
+  let fromx = point.x, fromy = point.y+headlen, tox = point.x+100+headlen, toy = point.y+headlen;
+  let angle = Math.atan2(toy - fromy, tox - fromx);
 
   // bring the line end back some to account for arrow head.
   tox = tox - (headlen) * Math.cos(angle);
@@ -312,7 +362,7 @@ const addDoubleArrow = () => {
     {
       x: fromx,  // start point
       y: fromy
-    },{
+    }, {
       x: fromx + (headlen),
       y: fromy + (headlen),
     }, {
@@ -347,8 +397,8 @@ const addDoubleArrow = () => {
 
 // Create a Fabric.js polygon object representing the double-headed arrow
   let doubleArrow = new fabric.Polygon(points, {
-    left: 50,
-    top: 50,
+    left: point.x,
+    top: point.y,
     fill: 'black',      // Fill color
     strokeWidth: 2,     // Border width
     snapAngle: 45,
@@ -360,9 +410,10 @@ const addDoubleArrow = () => {
 }
 
 const addTextbox = () => {
+  const point = getInsertionPoint();
   let text = new fabric.Textbox('Hello World', {
-    left: 100,
-    top: 100,
+    left: point.x,
+    top: point.y,
     snapAngle: 45,
     snapThreshold: 7
   });
@@ -370,9 +421,11 @@ const addTextbox = () => {
 }
 
 const addCustomObject = () => {
+  const point = getInsertionPoint();
+
   const customObj = new CustomObject({
-    left: 100,
-    top: 100,
+    left: point.x,
+    top: point.y,
     width: 50,
     height: 50,
     fill: 'blue',
@@ -386,13 +439,12 @@ const addCustomObject = () => {
 }
 
 const addImage = (url: string) => {
+  const point = getInsertionPoint();
   fabric.Image.fromURL(url, (image) => {
     // You can specify the position and other properties of the image here
     image.set({
-      left: 200,
-      top: 200,
-      scaleX: 0.5,
-      scaleY: 0.5,
+      left: point.x,
+      top: point.y,
       snapAngle: 45,
       snapThreshold: 7,
     });
@@ -403,7 +455,8 @@ const addImage = (url: string) => {
 }
 
 const focusToCenter = () => {
-  canvas.setViewportTransform([1,0,0,1,0,0]);
+  canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+  canvas.requestRenderAll();
 }
 
 const focusToSelection = () => {
@@ -413,20 +466,21 @@ const focusToSelection = () => {
     let centerX = canvas.width / 2;
     let centerY = canvas.height / 2;
 
-    let deltaX = centerX - selectedObject.left - selectedObject.width / 2;
-    let deltaY = centerY - selectedObject.top - selectedObject.height / 2;
+    let deltaX = centerX - (selectedObject.left + selectedObject.width / 2 * selectedObject.scaleX);
+    let deltaY = centerY - (selectedObject.top + selectedObject.height / 2 * selectedObject.scaleY);
 
-    let newTransform = [1,0,0,1,0,0];
+    let newTransform = [1, 0, 0, 1, 0, 0];
     newTransform[4] += deltaX;
     newTransform[5] += deltaY;
 
     canvas.setViewportTransform(newTransform);
+    canvas.requestRenderAll();
   }
 }
 
 const setBackgroundColor = (color: string) => {
   canvas.backgroundColor = color;
-  canvas.renderAll();
+  canvas.requestRenderAll();
 }
 
 const getBackgroundColor = () => {
@@ -445,8 +499,9 @@ const exportJSON = () => {
   return canvas.toDatalessJSON();
 }
 
-const loadJSON = (json:string) => {
-  canvas.loadFromJSON(json, (objects:any, options:any) => {
+const loadJSON = (json: string) => {
+  canvas.loadFromJSON(json, (objects: any, options: any) => {
+    console.log(`${objects.length} objects are loaded: ${options}`)
   });
 }
 
@@ -454,11 +509,14 @@ const setEditableLayer = (layer: string) => {
   editLayer = layer;
 }
 
-const translatePath = (point:any) => {
+const translatePath = (point: any) => {
   const fabricPoint = new fabric.Point(point.x, point.y);
-  const invertedMatrix = fabric.util.invertTransform(canvas.viewportTransform)
-  const transformedPoint = fabric.util.transformPoint(fabricPoint, invertedMatrix);
-  return transformedPoint;
+  const invertedMatrix = fabric.util.invertTransform(canvas.viewportTransform);
+  return fabric.util.transformPoint(fabricPoint, invertedMatrix);
+}
+
+const getInsertionPoint = () =>{
+  return fabric.util.transformPoint(new fabric.Point(canvas.width/2, canvas.height/2), fabric.util.invertTransform(canvas.viewportTransform));
 }
 
 defineExpose({
