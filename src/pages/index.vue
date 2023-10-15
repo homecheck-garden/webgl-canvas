@@ -8,7 +8,7 @@ layout: "default"
 
 <script setup lang="ts">
 import {ref, onMounted, unref} from 'vue';
-import BlueprintCanvas from '@/components/BlueprintCanvas.vue';
+import BlueprintCanvas from '@/components/BlueprintCanvas/BlueprintCanvas.vue';
 
 const canvas = ref<InstanceType<typeof BlueprintCanvas> | null>(null);
 const log = ref();

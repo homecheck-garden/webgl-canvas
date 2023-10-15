@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { describe, it } from 'vitest'
-import BlueprintCanvas from '@/components/BlueprintCanvas.vue'
+import BlueprintCanvas from '@/components/BlueprintCanvas/BlueprintCanvas.vue'
 
 describe('BlueprintCanvas', () => {
     const msg = 'Hello Vue 3'

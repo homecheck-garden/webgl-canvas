@@ -7,14 +7,14 @@
 <script setup lang="ts">
 import {fabric} from 'fabric';
 import {onMounted, ref} from 'vue'
-import CustomObject from "@/components/objects/CustomObject";
+import CustomObject from "@/components/BlueprintCanvas/objects/CustomObject";
+import LayerManager from "@/components/BlueprintCanvas/LayerManager";
+import Layer from "@/components/BlueprintCanvas/objects/Layer";
 
 let c = ref(null);
 let canvas: any = null;
 
-const backgroundObjects: Array<Object> = [];
-const objects: Array<Object> = [];
-
+let layerManager:LayerManager;
 let editLayer: string = 'background';
 
 const props = defineProps(['width', 'height', 'editLayer'])
@@ -27,6 +27,10 @@ onMounted(() => {
     height: props.height,
     selection: false,
   });
+
+  layerManager = new LayerManager(canvas);
+  layerManager.addLayer(new Layer('background'));
+  layerManager.addLayer(new Layer('object'));
 
   canvas.on("mouse:wheel", (opt: any) => {
     opt.e.preventDefault()
@@ -165,12 +169,12 @@ const addPoint = () => {
   });
 
   circle.hasControls = false;
-  canvas.add(circle);
+  layerManager.getLayerByName(editLayer)?.addObject(circle)
 }
 
 const addCircle = () => {
   const point = getInsertionPoint();
-  const circle = new fabric.Circle({
+  const object = new fabric.Circle({
     left: point.x,
     top: point.y,
     radius: 50,
@@ -178,14 +182,12 @@ const addCircle = () => {
     snapAngle: 45,
     snapThreshold: 7,
   });
-
-  canvas.add(circle);
-  addToLayer(editLayer, circle);
+  layerManager.getLayerByName(editLayer)?.addObject(object)
 }
 
 const addRect = () => {
   const point = getInsertionPoint();
-  const rect = new fabric.Rect({
+  const object = new fabric.Rect({
     left: point.x,
     top: point.y,
     width: 100,
@@ -194,13 +196,12 @@ const addRect = () => {
     snapAngle: 45,
     snapThreshold: 7,
   });
-  canvas.add(rect);
-  addToLayer(editLayer, rect);
+  layerManager.getLayerByName(editLayer)?.addObject(object)
 }
 
 const addTriangle = () => {
   const point = getInsertionPoint();
-  const triangle = new fabric.Triangle({
+  const object = new fabric.Triangle({
     left: point.x,
     top: point.y,
     width: 100,
@@ -209,25 +210,23 @@ const addTriangle = () => {
     snapAngle: 45,
     snapThreshold: 7,
   });
-  canvas.add(triangle);
-  addToLayer(editLayer, triangle);
+  layerManager.getLayerByName(editLayer)?.addObject(object)
 }
 
 const addLine = () => {
   const point = getInsertionPoint();
-  const line = new fabric.Line([point.x, point.y, point.x+200, point.y+0], {
+  const object = new fabric.Line([point.x, point.y, point.x+200, point.y+0], {
     stroke: 'red',
     strokeWidth: 2,
     snapAngle: 45,
     snapThreshold: 7,
   });
-  canvas.add(line);
-  addToLayer(editLayer, line);
+  layerManager.getLayerByName(editLayer)?.addObject(object)
 }
 
 const addPolyline = () => {
   const point = getInsertionPoint();
-  const polyline = new fabric.Polyline(
+  const object = new fabric.Polyline(
       [
         {x: point.x, y: point.y},
         {x: point.x + 100, y: point.y},
@@ -241,8 +240,7 @@ const addPolyline = () => {
         snapThreshold: 7,
       }
   );
-  canvas.add(polyline);
-  addToLayer(editLayer, polyline);
+  layerManager.getLayerByName(editLayer)?.addObject(object)
 }
 
 const addPolygon = () => {
@@ -254,7 +252,7 @@ const addPolygon = () => {
     {x: point.x+75, y: point.y},
   ]
 
-  const polygon = new fabric.Polygon(
+  const object = new fabric.Polygon(
       points,
       {
         fill: 'purple',
@@ -262,24 +260,22 @@ const addPolygon = () => {
         snapThreshold: 7,
       }
   );
-  canvas.add(polygon);
-  addToLayer(editLayer, polygon);
+  layerManager.getLayerByName(editLayer)?.addObject(object)
 }
 
 const addPath = () => {
   const point = getInsertionPoint();
-  const path = new fabric.Path(`M ${point.x} ${point.y} L ${point.x+50} ${point.y+50} L ${point.x+100} ${point.y} Z`, {
+  const object = new fabric.Path(`M ${point.x} ${point.y} L ${point.x+50} ${point.y+50} L ${point.x+100} ${point.y} Z`, {
     fill: 'orange',
     snapAngle: 45,
     snapThreshold: 7,
   });
-  canvas.add(path);
-  addToLayer(editLayer, path);
+  layerManager.getLayerByName(editLayer)?.addObject(object)
 }
 
 const addEllipse = () => {
   const point = getInsertionPoint();
-  const ellipse = new fabric.Ellipse({
+  const object = new fabric.Ellipse({
     left: point.x,
     top: point.y,
     rx: 50,
@@ -288,8 +284,7 @@ const addEllipse = () => {
     snapAngle: 45,
     snapThreshold: 7,
   });
-  canvas.add(ellipse);
-  addToLayer(editLayer, ellipse);
+  layerManager.getLayerByName(editLayer)?.addObject(object)
 }
 
 const addArrow = () => {
@@ -335,16 +330,13 @@ const addArrow = () => {
   ];
 
   // Create a Fabric.js polygon object representing the arrow
-  let arrow = new fabric.Polygon(points, {
+  let object = new fabric.Polygon(points, {
     fill: 'black',      // Fill color
     strokeWidth: 2,     // Border width
     snapAngle: 45,
     snapThreshold: 7,
   });
-
-  // Add the arrow to the canvas
-  canvas.add(arrow);
-  addToLayer(editLayer, arrow);
+  layerManager.getLayerByName(editLayer)?.addObject(object)
 }
 
 const addDoubleArrow = () => {
@@ -395,8 +387,7 @@ const addDoubleArrow = () => {
     }
   ];
 
-// Create a Fabric.js polygon object representing the double-headed arrow
-  let doubleArrow = new fabric.Polygon(points, {
+  let object = new fabric.Polygon(points, {
     left: point.x,
     top: point.y,
     fill: 'black',      // Fill color
@@ -405,25 +396,24 @@ const addDoubleArrow = () => {
     snapThreshold: 7
   });
 
-// Add the double-headed arrow to the canvas
-  canvas.add(doubleArrow);
+  layerManager.getLayerByName(editLayer)?.addObject(object)
 }
 
 const addTextbox = () => {
   const point = getInsertionPoint();
-  let text = new fabric.Textbox('Hello World', {
+  let object = new fabric.Textbox('Hello World', {
     left: point.x,
     top: point.y,
     snapAngle: 45,
     snapThreshold: 7
   });
-  canvas.add(text);
+  layerManager.getLayerByName(editLayer)?.addObject(object)
 }
 
 const addCustomObject = () => {
   const point = getInsertionPoint();
 
-  const customObj = new CustomObject({
+  const object = new CustomObject({
     left: point.x,
     top: point.y,
     width: 50,
@@ -434,23 +424,21 @@ const addCustomObject = () => {
     snapThreshold: 7,
   });
 
-  canvas.add(customObj);
-  addToLayer(editLayer, customObj);
+  layerManager.getLayerByName(editLayer)?.addObject(object)
 }
 
 const addImage = (url: string) => {
   const point = getInsertionPoint();
-  fabric.Image.fromURL(url, (image) => {
+  fabric.Image.fromURL(url, (object) => {
     // You can specify the position and other properties of the image here
-    image.set({
+    object.set({
       left: point.x,
       top: point.y,
       snapAngle: 45,
       snapThreshold: 7,
     });
 
-    canvas.add(image);
-    addToLayer(editLayer, image);
+    layerManager.getLayerByName(editLayer)?.addObject(object)
   });
 }
 
