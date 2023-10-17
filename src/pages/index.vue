@@ -12,7 +12,7 @@ import BlueprintCanvas from '@/components/BlueprintCanvas/BlueprintCanvas.vue';
 import LayerManager from "@/components/BlueprintCanvas/LayerManager";
 
 const canvas = ref<InstanceType<typeof BlueprintCanvas> | null>(null);
-let layerManager:LayerManager|undefined;
+let layerManager: LayerManager | undefined;
 const log = ref();
 const imageInput = ref(null);
 const lockCheckbox = ref(null);
@@ -93,7 +93,7 @@ const showFileDialog = () => {
 }
 
 const focusToCenter = () => {
-    canvas.value?.focusToCenter();
+  canvas.value?.focusToCenter();
 }
 
 const focusToSelection = () => {
@@ -102,10 +102,8 @@ const focusToSelection = () => {
 
 const onLayerChange = (event: any) => {
   let layer = layerManager?.selectLayer(event.currentTarget.value);
-  if(layer?.locked){
-    const input: any = unref(imageInput);
-    input.checked = true;
-  }
+  const input: any = unref(lockCheckbox);
+  input.checked = layer?.locked;
 }
 
 const onBackgroundColorChange = (event: any) => {
@@ -128,7 +126,7 @@ const loadJSON = (event: any) => {
 }
 
 const onClickCanvas = (event: any) => {
-  let point:any = {}
+  let point: any = {}
   point.x = event.offsetX;
   point.y = event.offsetY;
 

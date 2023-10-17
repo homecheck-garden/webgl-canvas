@@ -47,8 +47,7 @@ export default class LayerManager {
     }
 
     public selectLayer(layerName: string){
-        this.canvas?.discardActiveObject();
-        this.canvas?.renderAll();
+        this.canvas?.discardActiveObject().requestRenderAll();
         this.currentLayer = this.getLayerByName(layerName);
 
         if(!this.currentLayer?.locked){

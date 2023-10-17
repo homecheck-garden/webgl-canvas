@@ -17,6 +17,10 @@ export default class Layer {
         this.objects.forEach(obj => {
             obj.selectable = !value;
         })
+
+        if(value){
+            this.canvas?.discardActiveObject().requestRenderAll();
+        }
     }
 
     get selectable(): boolean {
