@@ -5,6 +5,8 @@ export default class LayerManager {
 
     layers:Layer[] = [];
     canvas:fabric.Canvas;
+    currentLayer:Layer | undefined = undefined;
+
     constructor(canvas:fabric.Canvas) {
         this.canvas = canvas;
     }
@@ -18,7 +20,7 @@ export default class LayerManager {
         const index = this.layers.indexOf(layer, 0);
         if (index > -1) {
             let found = this.layers.splice(index, 1);
-            this.canvas.remove(found[0].group);
+            found[0].removeAll();
             return true;
         }
         return false;
@@ -43,4 +45,22 @@ export default class LayerManager {
     public getLayerByName(layerName: string): Layer | undefined {
         return this.layers.find((layer) => layer.name === layerName);
     }
+
+    public selectLayer(layerName: string){
+        this.canvas?.discardActiveObject();
+        this.canvas?.renderAll();
+        this.currentLayer = this.getLayerByName(layerName);
+
+        if(!this.currentLayer?.locked){
+            this.currentLayer!.selectable = true;
+        }
+
+        this.layers.forEach(layer=>{
+            if(layer != this.currentLayer) {
+                layer.selectable = false;
+            }
+        })
+        return this.currentLayer;
+    }
+
 }

@@ -9,12 +9,16 @@ layout: "default"
 <script setup lang="ts">
 import {ref, onMounted, unref} from 'vue';
 import BlueprintCanvas from '@/components/BlueprintCanvas/BlueprintCanvas.vue';
+import LayerManager from "@/components/BlueprintCanvas/LayerManager";
 
 const canvas = ref<InstanceType<typeof BlueprintCanvas> | null>(null);
+let layerManager:LayerManager|undefined;
 const log = ref();
 const imageInput = ref(null);
+const lockCheckbox = ref(null);
 
 onMounted(() => {
+  layerManager = canvas.value?.getLayerManager();
 })
 
 const addPoint = () => {
@@ -97,10 +101,10 @@ const focusToSelection = () => {
 }
 
 const onLayerChange = (event: any) => {
-  if (event.currentTarget.selectedIndex == 0) {
-    canvas.value?.setEditableLayer('background');
-  } else {
-    canvas.value?.setEditableLayer('object');
+  let layer = layerManager?.selectLayer(event.currentTarget.value);
+  if(layer?.locked){
+    const input: any = unref(imageInput);
+    input.checked = true;
   }
 }
 
@@ -131,6 +135,10 @@ const onClickCanvas = (event: any) => {
   console.log(`canvas offset : ${JSON.stringify(point)}`);
   let transformed = canvas.value?.translatePath(point)
   console.log(`transformed offset : ${JSON.stringify(transformed)}`);
+}
+
+const onLockCheckboxChange = (event: any) => {
+  layerManager!.currentLayer!.locked = event.currentTarget.checked;
 }
 
 </script>
@@ -166,11 +174,14 @@ const onClickCanvas = (event: any) => {
         <option value="gray">Gray</option>
         <option value="blue">Blue</option>
       </select>
-      <label>Layer : </label>
-      <select @change="onLayerChange">
-        <option>Background</option>
-        <option selected>Objects</option>
-      </select>
+      <div>
+        <label>Layer : </label>
+        <select @change="onLayerChange">
+          <option value="Background">Background</option>
+          <option value="Objects" selected>Objects</option>
+        </select>
+        <label>locked</label><input ref="lockCheckbox" type="checkbox" @change="onLockCheckboxChange">
+      </div>
     </div>
     <div>
       <BlueprintCanvas ref="canvas" width="800" height="600" edit-layer="object" @click="onClickCanvas"/>

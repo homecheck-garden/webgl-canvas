@@ -14,8 +14,7 @@ import Layer from "@/components/BlueprintCanvas/objects/Layer";
 let c = ref(null);
 let canvas: any = null;
 
-let layerManager:LayerManager;
-let editLayer: string = 'background';
+let layerManager: LayerManager;
 
 const props = defineProps(['width', 'height', 'editLayer'])
 
@@ -29,8 +28,9 @@ onMounted(() => {
   });
 
   layerManager = new LayerManager(canvas);
-  layerManager.addLayer(new Layer('background'));
-  layerManager.addLayer(new Layer('object'));
+  layerManager.addLayer(new Layer('Background'));
+  layerManager.addLayer(new Layer('Objects'));
+  layerManager.selectLayer('Objects')
 
   canvas.on("mouse:wheel", (opt: any) => {
     opt.e.preventDefault()
@@ -102,8 +102,8 @@ onMounted(() => {
     },
     'touch:drag': function (evt: any) {
       if (mode === 'pan' && evt.self.state != 'up') {
-        currentX = evt.e.clientX ? evt.e.clientX:evt.e.touches[0].clientX;
-        currentY = evt.e.clientY ? evt.e.clientY:evt.e.touches[0].clientY;
+        currentX = evt.e.clientX ? evt.e.clientX : evt.e.touches[0].clientX;
+        currentY = evt.e.clientY ? evt.e.clientY : evt.e.touches[0].clientY;
         let xChange = currentX - lastX;
         let yChange = currentY - lastY;
 
@@ -120,8 +120,8 @@ onMounted(() => {
   canvas.on("mouse:down", function (opt: any) {
     if (!opt.target) {
       mode = 'pan';
-      lastX = opt.e.clientX ? opt.e.clientX:opt.e.touches[0].clientX;
-      lastY = opt.e.clientY ? opt.e.clientY:opt.e.touches[0].clientY;
+      lastX = opt.e.clientX ? opt.e.clientX : opt.e.touches[0].clientX;
+      lastY = opt.e.clientY ? opt.e.clientY : opt.e.touches[0].clientY;
     }
   }, false);
 
@@ -147,7 +147,7 @@ onMounted(() => {
     }
   }, false);
 
-  document.onkeydown = function(evt) {
+  document.onkeydown = function (evt) {
     if (canvas.getActiveObject()) {
       switch (evt.key) {
         case 'Backspace': // delete
@@ -169,7 +169,7 @@ const addPoint = () => {
   });
 
   circle.hasControls = false;
-  layerManager.getLayerByName(editLayer)?.addObject(circle)
+  layerManager.currentLayer?.addObject(circle)
 }
 
 const addCircle = () => {
@@ -182,7 +182,7 @@ const addCircle = () => {
     snapAngle: 45,
     snapThreshold: 7,
   });
-  layerManager.getLayerByName(editLayer)?.addObject(object)
+  layerManager.currentLayer?.addObject(object)
 }
 
 const addRect = () => {
@@ -196,7 +196,7 @@ const addRect = () => {
     snapAngle: 45,
     snapThreshold: 7,
   });
-  layerManager.getLayerByName(editLayer)?.addObject(object)
+  layerManager.currentLayer?.addObject(object)
 }
 
 const addTriangle = () => {
@@ -210,18 +210,18 @@ const addTriangle = () => {
     snapAngle: 45,
     snapThreshold: 7,
   });
-  layerManager.getLayerByName(editLayer)?.addObject(object)
+  layerManager.currentLayer?.addObject(object)
 }
 
 const addLine = () => {
   const point = getInsertionPoint();
-  const object = new fabric.Line([point.x, point.y, point.x+200, point.y+0], {
+  const object = new fabric.Line([point.x, point.y, point.x + 200, point.y + 0], {
     stroke: 'red',
     strokeWidth: 2,
     snapAngle: 45,
     snapThreshold: 7,
   });
-  layerManager.getLayerByName(editLayer)?.addObject(object)
+  layerManager.currentLayer?.addObject(object)
 }
 
 const addPolyline = () => {
@@ -240,16 +240,16 @@ const addPolyline = () => {
         snapThreshold: 7,
       }
   );
-  layerManager.getLayerByName(editLayer)?.addObject(object)
+  layerManager.currentLayer?.addObject(object)
 }
 
 const addPolygon = () => {
   const point = getInsertionPoint();
   let points = [
-    {x: point.x, y: point.y+50},
-    {x: point.x+50, y: point.y+100},
-    {x: point.x+100, y: point.y+50},
-    {x: point.x+75, y: point.y},
+    {x: point.x, y: point.y + 50},
+    {x: point.x + 50, y: point.y + 100},
+    {x: point.x + 100, y: point.y + 50},
+    {x: point.x + 75, y: point.y},
   ]
 
   const object = new fabric.Polygon(
@@ -260,17 +260,17 @@ const addPolygon = () => {
         snapThreshold: 7,
       }
   );
-  layerManager.getLayerByName(editLayer)?.addObject(object)
+  layerManager.currentLayer?.addObject(object)
 }
 
 const addPath = () => {
   const point = getInsertionPoint();
-  const object = new fabric.Path(`M ${point.x} ${point.y} L ${point.x+50} ${point.y+50} L ${point.x+100} ${point.y} Z`, {
+  const object = new fabric.Path(`M ${point.x} ${point.y} L ${point.x + 50} ${point.y + 50} L ${point.x + 100} ${point.y} Z`, {
     fill: 'orange',
     snapAngle: 45,
     snapThreshold: 7,
   });
-  layerManager.getLayerByName(editLayer)?.addObject(object)
+  layerManager.currentLayer?.addObject(object)
 }
 
 const addEllipse = () => {
@@ -284,13 +284,13 @@ const addEllipse = () => {
     snapAngle: 45,
     snapThreshold: 7,
   });
-  layerManager.getLayerByName(editLayer)?.addObject(object)
+  layerManager.currentLayer?.addObject(object)
 }
 
 const addArrow = () => {
-  let point =  getInsertionPoint()
+  let point = getInsertionPoint()
   let headlen = 15;  // arrow head size
-  let fromx = point.x, fromy = point.y+headlen, tox = point.x+100+headlen, toy = point.y+headlen;
+  let fromx = point.x, fromy = point.y + headlen, tox = point.x + 100 + headlen, toy = point.y + headlen;
   let angle = Math.atan2(toy - fromy, tox - fromx);
 
   // bring the line end back some to account for arrow head.
@@ -336,13 +336,13 @@ const addArrow = () => {
     snapAngle: 45,
     snapThreshold: 7,
   });
-  layerManager.getLayerByName(editLayer)?.addObject(object)
+  layerManager.currentLayer?.addObject(object)
 }
 
 const addDoubleArrow = () => {
   let point = getInsertionPoint();
   let headlen = 15;  // arrow head size
-  let fromx = point.x, fromy = point.y+headlen, tox = point.x+100+headlen, toy = point.y+headlen;
+  let fromx = point.x, fromy = point.y + headlen, tox = point.x + 100 + headlen, toy = point.y + headlen;
   let angle = Math.atan2(toy - fromy, tox - fromx);
 
   // bring the line end back some to account for arrow head.
@@ -396,7 +396,7 @@ const addDoubleArrow = () => {
     snapThreshold: 7
   });
 
-  layerManager.getLayerByName(editLayer)?.addObject(object)
+  layerManager.currentLayer?.addObject(object)
 }
 
 const addTextbox = () => {
@@ -407,7 +407,7 @@ const addTextbox = () => {
     snapAngle: 45,
     snapThreshold: 7
   });
-  layerManager.getLayerByName(editLayer)?.addObject(object)
+  layerManager.currentLayer?.addObject(object)
 }
 
 const addCustomObject = () => {
@@ -424,7 +424,7 @@ const addCustomObject = () => {
     snapThreshold: 7,
   });
 
-  layerManager.getLayerByName(editLayer)?.addObject(object)
+  layerManager.currentLayer?.addObject(object)
 }
 
 const addImage = (url: string) => {
@@ -438,7 +438,7 @@ const addImage = (url: string) => {
       snapThreshold: 7,
     });
 
-    layerManager.getLayerByName(editLayer)?.addObject(object)
+    layerManager.currentLayer?.addObject(object)
   });
 }
 
@@ -476,11 +476,7 @@ const getBackgroundColor = () => {
 }
 
 const addToLayer = (layer: string, object: any) => {
-  if (layer == 'background') {
-    backgroundObjects.push(object)
-  } else {
-    objects.push(object)
-  }
+  layerManager.getLayerByName(layer)?.addObject(object);
 }
 
 const exportJSON = () => {
@@ -489,12 +485,8 @@ const exportJSON = () => {
 
 const loadJSON = (json: string) => {
   canvas.loadFromJSON(json, (objects: any, options: any) => {
-    console.log(`${objects.length} objects are loaded: ${options}`)
+    console.log(`${objects.length} objects are loaded: ${options}`);
   });
-}
-
-const setEditableLayer = (layer: string) => {
-  editLayer = layer;
 }
 
 const translatePath = (point: any) => {
@@ -503,8 +495,12 @@ const translatePath = (point: any) => {
   return fabric.util.transformPoint(fabricPoint, invertedMatrix);
 }
 
-const getInsertionPoint = () =>{
-  return fabric.util.transformPoint(new fabric.Point(canvas.width/2, canvas.height/2), fabric.util.invertTransform(canvas.viewportTransform));
+const getInsertionPoint = () => {
+  return fabric.util.transformPoint(new fabric.Point(canvas.width / 2, canvas.height / 2), fabric.util.invertTransform(canvas.viewportTransform));
+}
+
+const getLayerManager = () => {
+  return layerManager;
 }
 
 defineExpose({
@@ -526,10 +522,10 @@ defineExpose({
   focusToSelection,
   setBackgroundColor,
   getBackgroundColor,
-  setEditableLayer,
   exportJSON,
   loadJSON,
   translatePath,
+  getLayerManager,
 })
 </script>
 
