@@ -139,6 +139,10 @@ const onLockCheckboxChange = (event: any) => {
   layerManager!.currentLayer!.locked = event.currentTarget.checked;
 }
 
+const onPanningCheckboxChange = (event: any) => {
+  canvas?.value?.setPanning(event.currentTarget.checked);
+}
+
 </script>
 
 <template>
@@ -179,10 +183,12 @@ const onLockCheckboxChange = (event: any) => {
           <option value="Objects" selected>Objects</option>
         </select>
         <label>locked</label><input ref="lockCheckbox" type="checkbox" @change="onLockCheckboxChange">
+
+        <label>panning</label><input ref="panningCheckbox" type="checkbox" @change="onPanningCheckboxChange" checked>
       </div>
     </div>
     <div>
-      <BlueprintCanvas ref="canvas" width="800" height="600" edit-layer="object" @click="onClickCanvas"/>
+      <BlueprintCanvas ref="canvas" width="800" height="600" @click="onClickCanvas"/>
       <textarea id="log" ref="log"></textarea>
     </div>
   </div>

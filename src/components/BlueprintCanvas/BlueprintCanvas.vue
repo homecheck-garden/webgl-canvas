@@ -6,20 +6,22 @@
 
 <script setup lang="ts">
 import {fabric} from 'fabric';
-import {onMounted, ref} from 'vue'
+import {onMounted, ref, watch} from 'vue'
 import CustomObject from "@/components/BlueprintCanvas/objects/CustomObject";
 import LayerManager from "@/components/BlueprintCanvas/LayerManager";
 import Layer from "@/components/BlueprintCanvas/objects/Layer";
 
 let c = ref(null);
 let canvas: any = null;
+let panning: boolean = true;
 
 let layerManager: LayerManager;
 
-const props = defineProps(['width', 'height', 'editLayer'])
+const props = defineProps(['width', 'height'])
 
 onMounted(() => {
   let mode = 'edit'
+
   canvas = new fabric.Canvas(c.value, {
     // You can specify Fabric.js options here
     width: props.width,
@@ -43,13 +45,14 @@ onMounted(() => {
       if (zoom < 0.01) zoom = 0.01;
       canvas.zoomToPoint({x: opt.e.offsetX, y: opt.e.offsetY}, zoom);
       canvas.requestRenderAll();
-
     } else {
-      let e = opt.e;
-      let vpt = canvas.viewportTransform;
-      vpt[4] += e.deltaX;
-      vpt[5] += e.deltaY;
-      canvas.requestRenderAll();
+      if (panning) {
+        let e = opt.e;
+        let vpt = canvas.viewportTransform;
+        vpt[4] += e.deltaX;
+        vpt[5] += e.deltaY;
+        canvas.requestRenderAll();
+      }
     }
     canvas.forEachObject((object: any) => {
       object.setCoords();
@@ -82,7 +85,6 @@ onMounted(() => {
         }
 
         if (mode === 'zoom' && evt.self.state != 'up') {
-
           let x = evt.e.touches[0]?.clientX - (evt.e.touches[0]?.clientX - evt.e.touches[1]?.clientX) / 2
           let y = evt.e.touches[0]?.clientY - (evt.e.touches[0]?.clientY - evt.e.touches[1]?.clientY) / 2
           let point = new fabric.Point(x, y);
@@ -101,7 +103,7 @@ onMounted(() => {
     'selection:cleared': function () {
     },
     'touch:drag': function (evt: any) {
-      if (mode === 'pan' && evt.self.state != 'up') {
+      if (mode === 'pan' && evt.self.state != 'up' && panning) {
         currentX = evt.e.clientX ? evt.e.clientX : evt.e.touches[0].clientX;
         currentY = evt.e.clientY ? evt.e.clientY : evt.e.touches[0].clientY;
         let xChange = currentX - lastX;
@@ -503,6 +505,15 @@ const getLayerManager = () => {
   return layerManager;
 }
 
+const setPanning = (enable: boolean) => {
+  panning = enable;
+}
+
+const getPanning = () => {
+  return panning
+}
+
+
 defineExpose({
   addCircle,
   addRect,
@@ -526,6 +537,8 @@ defineExpose({
   loadJSON,
   translatePath,
   getLayerManager,
+  setPanning,
+  getPanning,
 })
 </script>
 
