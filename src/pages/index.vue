@@ -139,6 +139,12 @@ const onLockCheckboxChange = (event: any) => {
   layerManager!.currentLayer!.locked = event.currentTarget.checked;
 }
 
+const onLockAllCheckboxChange = (event: any) => {
+  const input: any = unref(lockCheckbox);
+  input.checked = event.currentTarget.checked
+  layerManager!.SetLockAllLayers(event.currentTarget.checked);
+}
+
 const onPanningCheckboxChange = (event: any) => {
   canvas?.value?.setPanning(event.currentTarget.checked);
 }
@@ -182,9 +188,9 @@ const onPanningCheckboxChange = (event: any) => {
           <option value="Background">Background</option>
           <option value="Objects" selected>Objects</option>
         </select>
-        <label>locked</label><input ref="lockCheckbox" type="checkbox" @change="onLockCheckboxChange">
-
-        <label>panning</label><input ref="panningCheckbox" type="checkbox" @change="onPanningCheckboxChange" checked>
+        <label>Lock Layer</label><input ref="lockCheckbox" type="checkbox" @change="onLockCheckboxChange">
+        <label>Lock All Layers</label><input ref="lockAllCheckbox" type="checkbox" @change="onLockAllCheckboxChange">
+        <label>Panning</label><input ref="panningCheckbox" type="checkbox" @change="onPanningCheckboxChange" checked>
       </div>
     </div>
     <div>

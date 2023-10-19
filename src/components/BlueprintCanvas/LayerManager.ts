@@ -62,4 +62,13 @@ export default class LayerManager {
         return this.currentLayer;
     }
 
+    public SetLockAllLayers(locked:boolean){
+        this.layers.forEach(layer=>{
+            layer.locked = locked;
+            if(layer != this.currentLayer) {
+                layer.selectable = false;
+            }
+        })
+    }
+
 }
