@@ -27,6 +27,7 @@ onMounted(() => {
     width: props.width,
     height: props.height,
     selection: false,
+    backgroundColor: 'white',
   });
 
   layerManager = new LayerManager(canvas);
@@ -513,6 +514,41 @@ const getPanning = () => {
   return panning
 }
 
+const downloadImage = (fileName: string, shouldResetTransform = true) => {
+  let transform = canvas.viewportTransform.slice();
+  if (shouldResetTransform) {
+    canvas.viewportTransform = [1, 0, 0, 1, 0, 0];
+  }
+
+  let a: any = document.createElement('A');
+  a.href = canvas.toDataURL({
+    format: 'jpeg',
+    quality: 0.8
+  });
+  a.download = fileName + '.png'
+  a.click();
+
+  canvas.viewportTransform = transform;
+};
+
+const toDataURL = (shouldResetTransform = true) => {
+  let transform = canvas.viewportTransform.slice();
+  if (shouldResetTransform) {
+    canvas.viewportTransform = [1, 0, 0, 1, 0, 0];
+  }
+
+  let dataUrl = canvas.toDataURL({
+    format: 'jpeg',
+    quality: 0.8
+  });
+
+  canvas.viewportTransform = transform;
+  return dataUrl;
+};
+
+
+
+
 
 defineExpose({
   addCircle,
@@ -539,6 +575,8 @@ defineExpose({
   getLayerManager,
   setPanning,
   getPanning,
+  downloadImage,
+  toDataURL,
 })
 </script>
 

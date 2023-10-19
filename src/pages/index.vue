@@ -110,19 +110,21 @@ const onBackgroundColorChange = (event: any) => {
   canvas.value?.setBackgroundColor(event.currentTarget.value)
 }
 
-const exportJSON = (event: any) => {
-  let json = JSON.stringify(canvas.value?.exportJSON());
-  console.log(json)
-  log.value.value = json;
-}
-
 const loadJSON = (event: any) => {
   try {
     canvas.value?.loadJSON(log.value.value);
   } catch (e) {
     alert('Load error. Please add valid json data in log textarea.')
   }
+}
 
+const exportBase64 = (event: any) => {
+  let base64 = JSON.stringify(canvas.value?.toDataURL());
+  log.value.value = base64;
+}
+
+const downloadImage = () => {
+  canvas.value?.downloadImage('canvas');
 }
 
 const onClickCanvas = (event: any) => {
@@ -146,7 +148,7 @@ const onLockAllCheckboxChange = (event: any) => {
 }
 
 const onPanningCheckboxChange = (event: any) => {
-  canvas?.value?.setPanning(event.currentTarget.checked);
+  canvas.value?.setPanning(event.currentTarget.checked);
 }
 
 </script>
@@ -173,8 +175,10 @@ const onPanningCheckboxChange = (event: any) => {
     <div class="buttonContainer">
       <button @click="focusToCenter">Focus to Center</button>
       <button @click="focusToSelection">Focus To Selection</button>
-      <button @click="exportJSON">Export JSON</button>
       <button @click="loadJSON">Load JSON</button>
+      <button @click="exportJSON">Export JSON</button>
+      <button @click="exportBase64">Export Base64</button>
+      <button @click="downloadImage">Export JPG</button>
       <label>Background Color : </label>
       <select @change="onBackgroundColorChange">
         <option selected value="">none</option>
