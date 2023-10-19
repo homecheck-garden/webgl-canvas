@@ -118,9 +118,14 @@ const loadJSON = (event: any) => {
   }
 }
 
+const exportJSON = (event: any) => {
+  let json = JSON.stringify(canvas.value?.exportJSON());
+  console.log(json)
+  log.value.value = json;
+}
+
 const exportBase64 = (event: any) => {
-  let base64 = JSON.stringify(canvas.value?.toDataURL());
-  log.value.value = base64;
+  log.value.value = canvas.value?.toDataURL();
 }
 
 const downloadImage = () => {
@@ -178,7 +183,7 @@ const onPanningCheckboxChange = (event: any) => {
       <button @click="loadJSON">Load JSON</button>
       <button @click="exportJSON">Export JSON</button>
       <button @click="exportBase64">Export Base64</button>
-      <button @click="downloadImage">Export JPG</button>
+      <button @click="downloadImage">Download Image</button>
       <label>Background Color : </label>
       <select @change="onBackgroundColorChange">
         <option selected value="">none</option>
