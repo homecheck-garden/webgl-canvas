@@ -18,7 +18,7 @@ export default class Layer {
             obj.selectable = !value;
         })
 
-        if(value){
+        if (value) {
             this.canvas?.discardActiveObject().requestRenderAll();
         }
     }
@@ -40,6 +40,9 @@ export default class Layer {
     }
 
     public addObject(obj: any): void {
+        if (this._locked) {
+            obj.selectable = false;
+        }
         this.canvas?.add(obj)
         obj.setCoords();
         this.canvas?.requestRenderAll();
